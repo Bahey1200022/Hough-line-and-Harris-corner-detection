@@ -99,8 +99,5 @@ fetch('/upload2', {
     div3.src = image_url;
 })
 .catch(error => console.error('Error:', error));
-
-
-
    
     ;});
