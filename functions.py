@@ -16,8 +16,7 @@ def convert_rgb_to_bgr(image):
     """
     bgr_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     return bgr_image
-
-
+    
 
 def gaussian_kernel(image, kernel_size, sigma=None):
     """
@@ -205,3 +204,79 @@ def hysteresis(img):
                     pass
 
     return img
+
+
+# Perform Harris Corner Detection from Scratch
+
+def harris_corner_detection(original_image,greyscale_image, window_size=9, k=0.04, threshold=0.5):
+    """
+    Perform Harris corner detection on the input image.
+
+    Args:
+    - image (ndarray): Input image.
+    - window_size (int): Size of the window for calculating the corner response function.
+    - k (float): Empirical constant to be used in the Harris detector; k should lie between 0.04 and 0.06 for good results.
+    - threshold (float): Threshold for corner response function.
+
+    Returns:
+    - corners (ndarray): Image with detected corners.
+    The result of Harris Corner Detection is a grayscale image with this score as the intensity of that particular pixel. 
+    Thresholding for a suitable value  of R gives the corners in the image.
+    """
+
+   
+
+    R = np.zeros(greyscale_image.shape) 
+
+    # Apply gaussian blur
+    greyscale_image = cv2.GaussianBlur(greyscale_image, (window_size, window_size), 3)
+
+    # Compute image gradients
+    Ix = cv2.Sobel(greyscale_image, cv2.CV_64F, 1, 0, ksize=9)
+    Iy = cv2.Sobel(greyscale_image, cv2.CV_64F, 0, 1, ksize=9)
+
+    # Compute elements of the structure tensor
+    # element wise product of Ix and Iy
+    Ixx = Ix ** 2
+    Iyy = Iy ** 2
+    Ixy = Ix * Iy
+
+    # Compute sums of the structure tensor elements over the window
+    #This step gives the product of the gradient components for the Matrix M.
+
+    Sxx = cv2.GaussianBlur(Ixx, (window_size, window_size), 3)
+    Syy = cv2.GaussianBlur(Iyy, (window_size, window_size), 3)
+    Sxy = cv2.GaussianBlur(Ixy, (window_size, window_size), 3)
+
+    # Compute the corner response function
+    det = (Sxx * Syy) - (Sxy ** 2)
+    trace = Sxx + Syy
+
+    """
+    M =[Ix^2  IxIy]
+       [IxIy  Iy^2]
+    R = det(M) - k * trace(M)^2
+
+    The corner response matrix, denoted as R, is formed based on the gradient information obtained from the image. 
+    It represents the likelihood of each pixel being a corner.
+    When |R| is small, which happens when λ1 and λ2 are small, the region is flat.
+    When R<0, which happens when λ1>>λ2 or vice-versa, the region is an edge
+    When R is large, which happens when λ1 and λ2 are large and λ1∼λ2, the region is a corner
+    """
+   # Compute the corner response function
+    R = det - k * (trace ** 2)
+
+   # Determine the corners based on the threshold. 
+    max_Value = (threshold/100) * np.max(R)
+    # Create a copy of the original image to draw corners on
+    corners_image = np.copy(original_image)
+
+    # Iterate over each pixel in the image and draw a filled circle at the corner position
+    # if the pixel value is greater than the threshold and is the maximum value in the 3x3 neighborhood
+    for i in range(1, R.shape[0] - 1):
+        for j in range(1, R.shape[1] - 1):
+            if R[i, j] > max_Value and R[i, j] == np.max(R[i - 1:i + 2, j - 1:j + 2]):
+                 cv2.circle(corners_image, (j, i), 5, (255, 0, 0), -1)  # Draw a filled circle at the corner position
+
+
+    return corners_image

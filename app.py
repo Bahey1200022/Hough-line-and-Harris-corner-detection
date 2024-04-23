@@ -52,17 +52,17 @@ def upload2():
     # Convert image data to a PIL Image object
     image = Image.open(io.BytesIO(image_data))
 
-    # Convert RGB image to BGR format
-    cv2_image = functions.convert_rgb_to_bgr(image)
+    original_image_rgb = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2RGB)
 
-    # Convert BGR image to grayscale
-    cv2_image = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
+    greyscale_image = cv2.cvtColor(original_image_rgb, cv2.COLOR_RGB2GRAY)
+
     ###############################################################################
-    
-    
+    output_image = functions.harris_corner_detection(original_image = original_image_rgb, greyscale_image = greyscale_image, threshold= threshold)
+    output_image = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
+
     ####################################################################################
     output_path = os.path.join(os.path.dirname(__file__), 'image2.png')
-    cv2.imwrite(output_path, cv2_image)
+    cv2.imwrite(output_path, output_image)
 
     # Return the processed image file
     return send_file('image2.png', mimetype='image/png')
