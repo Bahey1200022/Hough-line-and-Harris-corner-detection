@@ -3,6 +3,8 @@ var div1 = document.getElementById('originalimg1');
 
 
 var div2=document.getElementById('modified');
+var div3=document.getElementById('modified2');
+
 var btn = document.getElementById('submitBtn');
 
 var inputField = document.getElementById('lines');
@@ -69,7 +71,7 @@ fetch('/upload', {
     headers: {
         'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ lines: lines, image_data: div1.src, Threshold:Threshold ,resolution:resolution })
+    body: JSON.stringify({ lines: lines, image_data: div1.src ,resolution:resolution })
 })
 .then(response => response.blob())
 .then(image => {
@@ -80,5 +82,25 @@ fetch('/upload', {
     div2.src = image_url;
 })
 .catch(error => console.error('Error:', error));
+
+fetch('/upload2', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ image_data: div1.src ,Threshold:Threshold })
+})
+.then(response => response.blob())
+.then(image => {
+    // Create a local URL for the image
+    var image_url = URL.createObjectURL(image);
+
+    // Set the source of an image element to the local URL
+    div3.src = image_url;
+})
+.catch(error => console.error('Error:', error));
+
+
+
    
     ;});
