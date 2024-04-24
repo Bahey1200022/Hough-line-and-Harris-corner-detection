@@ -27,17 +27,16 @@ def upload():
     # Convert image data to a PIL Image object
     image = Image.open(io.BytesIO(image_data))
 
-    # Convert RGB image to BGR format
-    cv2_image = functions.convert_rgb_to_bgr(image)
+    original_image_rgb = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2RGB)
 
-    # Convert BGR image to grayscale
-    cv2_image = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
+    greyscale_image = cv2.cvtColor(original_image_rgb, cv2.COLOR_RGB2GRAY)
     ###############################################################################
     
-    
+    lines = functions.HoughLine( greyscale_image, lines, resolution)
+    output_image=functions.draw_lines_on_image(greyscale_image, lines)
     ####################################################################################
     output_path = os.path.join(os.path.dirname(__file__), 'image.png')
-    cv2.imwrite(output_path, cv2_image)
+    cv2.imwrite(output_path, output_image)
 
     # Return the processed image file
     return send_file('image.png', mimetype='image/png')

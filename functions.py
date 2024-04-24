@@ -280,3 +280,95 @@ def harris_corner_detection(original_image,greyscale_image, window_size=9, k=0.0
 
 
     return corners_image
+
+
+
+
+
+    
+    
+def HoughLine(img,numberOfLines=200,resolution=1):
+    # Apply edge detection method on the image
+    edges = cv2.Canny(img, 50, 150, apertureSize=3)
+    height, width = edges.shape
+    img_diagonal = np.ceil(np.sqrt(height**2 + width**2)) # max_dist
+    
+    #transformation from image space to parameter space
+     # x cos(theta) + y sin(theta) = rho
+
+    ### parameter space limits
+    rhos = np.arange(-img_diagonal, img_diagonal + 1, resolution)
+    #'rho' is the distance from the origin to the line along a vector perpendicular to the line. The range of possible 'rho' values is from -img_diagonal to img_diagonal.
+    thetas = np.deg2rad(np.arange(-90, 90, resolution))
+    # thetas covers all possible orientations of the line
+    
+    # create the empty Hough Accumulator with dimensions equal to the size of
+    # rhos and thetas
+    H = np.zeros((len(rhos), len(thetas)), dtype=np.uint64)
+    y_idxs, x_idxs = np.nonzero(edges) # find all edge (nonzero) pixel indexes
+    
+    for i in range(len(x_idxs)): # cycle through edge points
+        x = x_idxs[i]
+        y = y_idxs[i]
+
+        for j in range(len(thetas)): # cycle through thetas and calc rho
+            rho = int((x * np.cos(thetas[j]) + y * np.sin(thetas[j])) + img_diagonal)
+            H[rho, j] += 1
+            
+    H=  np.where(H > numberOfLines, H, 0)       
+    # Find indices of non-zero values in thresholded accumulator array
+    rho_idxs, theta_idxs = np.nonzero(H)
+
+    # Extract rho and theta values for detected lines
+    rhos_detected = rhos[rho_idxs]
+    thetas_detected = thetas[theta_idxs]
+
+    # Combine rho and theta values into a single array of line parameters
+    lines = np.column_stack((rhos_detected, thetas_detected))
+    return lines
+    
+    
+    
+
+            
+def draw_lines(img, lines):
+    # Create a blank image
+    line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+
+    # Draw each line
+    for rho, theta in lines:
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        x1 = int(x0 + 1000 * (-b))
+        y1 = int(y0 + 1000 * (a))
+        x2 = int(x0 - 1000 * (-b))
+        y2 = int(y0 - 1000 * (a))
+
+        cv2.line(line_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+
+    return line_img         
+            
+def draw_lines_on_image(img, lines):
+    # Draw lines on a blank image
+    line_img = draw_lines(img, lines)
+
+    # Convert original image to RGB if it's grayscale
+    if len(img.shape) == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+    # Overlay line image on original image
+    overlay_img = cv2.addWeighted(img, 0.8, line_img, 1, 0)
+
+    return overlay_img   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
