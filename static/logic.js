@@ -6,6 +6,7 @@ var div2=document.getElementById('modified');
 var div3=document.getElementById('modified2');
 
 var btn = document.getElementById('submitBtn');
+var btn2 = document.getElementById('submitBtn2');
 
 var inputField = document.getElementById('lines');
 var lines = parseFloat(inputField.value);
@@ -83,21 +84,40 @@ fetch('/upload', {
 })
 .catch(error => console.error('Error:', error));
 
-fetch('/upload2', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ image_data: div1.src ,Threshold:Threshold })
-})
-.then(response => response.blob())
-.then(image => {
-    // Create a local URL for the image
-    var image_url = URL.createObjectURL(image);
 
-    // Set the source of an image element to the local URL
-    div3.src = image_url;
-})
-.catch(error => console.error('Error:', error));
-   
     ;});
+
+
+
+
+
+
+
+
+
+
+
+    btn2.addEventListener('click', function() {
+       
+    
+        Threshold = parseFloat(inputField2.value);
+    
+    
+    fetch('/upload2', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ image_data: div1.src ,Threshold:Threshold })
+    })
+    .then(response => response.blob())
+    .then(image => {
+        // Create a local URL for the image
+        var image_url = URL.createObjectURL(image);
+    
+        // Set the source of an image element to the local URL
+        div3.src = image_url;
+    })
+    .catch(error => console.error('Error:', error));
+
+    });
