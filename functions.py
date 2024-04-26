@@ -115,25 +115,25 @@ def HoughLine(img,numberOfLines,resolution):
     ### parameter space limits
     rhos = np.arange(-max_rho, max_rho + 1, resolution)
     #'rho' is the distance from the origin to the line along a vector perpendicular to the line. The range of possible 'rho' values is from -img_diagonal to img_diagonal.
-    thetas = np.deg2rad(np.arange(0, 180, resolution))
+    thetas = np.deg2rad(np.arange(-90, 90, 1))
     # thetas covers all possible orientations of the line
     print('thetas',thetas.shape)
     print('rhos',rhos.shape)
     # create the empty Hough Accumulator with dimensions equal to the size of
     # rhos and thetas
     accumulator = np.zeros((len(rhos), len(thetas)), dtype=np.uint64)
-    x_canny, y_canny = np.nonzero(edges) # find all edge (nonzero) pixel indexes
+    y_idxs, x_idxs = np.nonzero(edges) # find all edge (nonzero) pixel indexes
     print('accumulator',accumulator.shape)
-    print('y',y_canny.shape)
-    print('x',x_canny.shape)
-    for i in range(len(x)): # cycle through edge points
-        x = x_canny[i]
-        y = y_canny[i]
+    print('y',y_idxs.shape)
+    print('x',x_idxs.shape)
+    for i in range(len(x_idxs)): # cycle through edge points
+        x = x_idxs[i]
+        y = y_idxs[i]
         
 
         for j in range(len(thetas)): # cycle through thetas and calc rho
             rho = int(x * np.cos(thetas[j]) + y * np.sin(thetas[j]))
-            rho += int(img_diagonal) ##accounting for negative values
+            rho += int(img_diagonal)
             accumulator[rho, j] += 1
             
     accumulator=  np.where(accumulator > numberOfLines, accumulator, 0)       
