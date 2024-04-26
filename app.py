@@ -33,7 +33,7 @@ def upload():
     ###############################################################################
     
     lines = functions.HoughLine( greyscale_image, lines, resolution)
-    output_image=functions.draw_lines_on_image(greyscale_image, lines)
+    output_image=functions.transformToImageSpace(greyscale_image, lines)
     ####################################################################################
     output_path = os.path.join(os.path.dirname(__file__), 'image.png')
     cv2.imwrite(output_path, output_image)

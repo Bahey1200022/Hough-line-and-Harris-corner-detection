@@ -101,42 +101,36 @@ def harris_corner_detection(original_image,greyscale_image, window_size=9, k=0.0
 
 
     
-    
-def HoughLine(img,numberOfLines,resolution):
+
+def HoughLine(img, numberOfLines, resolution):
     # Apply edge detection method on the image
     edges = cv2.Canny(img, 50, 150, apertureSize=3)
     height, width = edges.shape
     img_diagonal = np.ceil(np.sqrt(height**2 + width**2)) # max_dist
-    max_rho = img_diagonal
+    max_rho = int(np.ceil(img_diagonal / resolution)) * resolution
     
     #transformation from image space to parameter space
      # x cos(theta) + y sin(theta) = rho
 
     ### parameter space limits
     rhos = np.arange(-max_rho, max_rho + 1, resolution)
-    #'rho' is the distance from the origin to the line along a vector perpendicular to the line. The range of possible 'rho' values is from -img_diagonal to img_diagonal.
-    thetas = np.deg2rad(np.arange(-90, 90, 1))
-    # thetas covers all possible orientations of the line
-    print('thetas',thetas.shape)
-    print('rhos',rhos.shape)
+    thetas = np.deg2rad(np.arange(-90, 90, resolution))
+    
     # create the empty Hough Accumulator with dimensions equal to the size of
     # rhos and thetas
     accumulator = np.zeros((len(rhos), len(thetas)), dtype=np.uint64)
     y_idxs, x_idxs = np.nonzero(edges) # find all edge (nonzero) pixel indexes
-    print('accumulator',accumulator.shape)
-    print('y',y_idxs.shape)
-    print('x',x_idxs.shape)
+    
     for i in range(len(x_idxs)): # cycle through edge points
         x = x_idxs[i]
         y = y_idxs[i]
-        
 
         for j in range(len(thetas)): # cycle through thetas and calc rho
-            rho = int(x * np.cos(thetas[j]) + y * np.sin(thetas[j]))
-            rho += int(img_diagonal)
-            accumulator[rho, j] += 1
+            rho_value = x * np.cos(thetas[j]) + y * np.sin(thetas[j])
+            rho_index = int(np.round((rho_value + max_rho) / resolution))
+            accumulator[rho_index, j] += 1
             
-    accumulator=  np.where(accumulator > numberOfLines, accumulator, 0)       
+    accumulator = np.where(accumulator > numberOfLines, accumulator, 0)       
     # Find indices of non-zero values in thresholded accumulator array
     rho_idxs, theta_idxs = np.nonzero(accumulator)
 
@@ -154,7 +148,7 @@ def HoughLine(img,numberOfLines,resolution):
             
        
             
-def draw_lines_on_image(img, lines):
+def transformToImageSpace(img, lines):
     # Draw lines on a blank image
     #generate the x y vals from rho and theta values
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
