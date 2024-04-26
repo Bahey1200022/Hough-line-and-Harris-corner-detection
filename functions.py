@@ -104,12 +104,13 @@ def harris_corner_detection(original_image,greyscale_image, window_size=9, k=0.0
 
 def HoughLine(img, numberOfLines, resolution):
     # Apply edge detection method on the image
-    edges = cv2.Canny(img, 50, 150, apertureSize=3)
+    edges = cv2.Canny(img, 50, 150, apertureSize=3) ## or any edge detection 
     height, width = edges.shape
     img_diagonal = np.ceil(np.sqrt(height**2 + width**2)) # max_dist
-    max_rho = int(np.ceil(img_diagonal / resolution)) * resolution
+    max_rho = int(np.ceil(img_diagonal / resolution)) * resolution ## fix indices error
     
     #transformation from image space to parameter space
+    # https://youtu.be/4zHbI-fFIlI?si=0-3vo8lHsmfb9d0p
      # x cos(theta) + y sin(theta) = rho
 
     ### parameter space limits
@@ -127,10 +128,10 @@ def HoughLine(img, numberOfLines, resolution):
 
         for j in range(len(thetas)): # cycle through thetas and calc rho
             rho_value = x * np.cos(thetas[j]) + y * np.sin(thetas[j])
-            rho_index = int(np.round((rho_value + max_rho) / resolution))
+            rho_index = int(np.round((rho_value + max_rho) / resolution)) #adding the max_rho to make the value positive
             accumulator[rho_index, j] += 1
             
-    accumulator = np.where(accumulator > numberOfLines, accumulator, 0)       
+    accumulator = np.where(accumulator > numberOfLines, accumulator, 0)    # point > numberOfLines will be a line in image space   
     # Find indices of non-zero values in thresholded accumulator array
     rho_idxs, theta_idxs = np.nonzero(accumulator)
 
@@ -151,6 +152,8 @@ def HoughLine(img, numberOfLines, resolution):
 def transformToImageSpace(img, lines):
     # Draw lines on a blank image
     #generate the x y vals from rho and theta values
+    # https://www.geeksforgeeks.org/line-detection-python-opencv-houghline-method/
+    
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
     for rho, theta in lines:
         a = np.cos(theta)
