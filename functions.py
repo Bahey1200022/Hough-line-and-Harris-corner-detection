@@ -115,7 +115,7 @@ def HoughLine(img,numberOfLines,resolution):
     ### parameter space limits
     rhos = np.arange(-max_rho, max_rho + 1, resolution)
     #'rho' is the distance from the origin to the line along a vector perpendicular to the line. The range of possible 'rho' values is from -img_diagonal to img_diagonal.
-    thetas = np.deg2rad(np.arange(-90, 90, 1))
+    thetas = np.deg2rad(np.arange(0, 180, 1))
     # thetas covers all possible orientations of the line
     print('thetas',thetas.shape)
     print('rhos',rhos.shape)
@@ -152,11 +152,12 @@ def HoughLine(img,numberOfLines,resolution):
     
 
             
-def draw_lines(img, lines):
-    # Create a blank image
+       
+            
+def draw_lines_on_image(img, lines):
+    # Draw lines on a blank image
+    #generate the x y vals from rho and theta values
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-
-    # Draw each line
     for rho, theta in lines:
         a = np.cos(theta)
         b = np.sin(theta)
@@ -168,12 +169,6 @@ def draw_lines(img, lines):
         y2 = int(y0 - 1000 * (a))
 
         cv2.line(line_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-
-    return line_img         
-            
-def draw_lines_on_image(img, lines):
-    # Draw lines on a blank image
-    line_img = draw_lines(img, lines)
 
     # Convert original image to RGB if it's grayscale
     if len(img.shape) == 2:
